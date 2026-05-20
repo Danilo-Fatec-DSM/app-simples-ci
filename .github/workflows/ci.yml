@@ -65,25 +65,30 @@ jobs:
             - name: Upload do Artefato ZIP
               uses: actions/upload-artifact@v4
               with:
-                  name: projeto-api-cep
+                  name: projeto-api-cepx''
                   path: release.zip
                   retention-days: 30
     deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            cd ~
-            if [ ! -d "danilo-app" ]; then
-              git clone https://github.com/${{ github.repository }} danilo-app
-            fi
-            cd danilo-app
-            git pull origin main
-            docker compose pull
-            docker compose up -d
+      needs: build-and-package
+      runs-on: ubuntu-latest
+
+      steps:
+        - name: Deploy via SSH
+          uses: appleboy/ssh-action@master
+          with:
+            host: ${{ secrets.SSH_HOST }}
+            username: ${{ secrets.SSH_USER }}
+            key: ${{ secrets.SSH_KEY }}
+
+            script: |
+              cd ~
+
+              if [ ! -d "danilo-app" ]; then
+                git clone https://github.com/${{ github.repository }} danilo-app
+              fi
+
+              cd danilo-app
+
+              git pull origin main
+              docker compose pull
+              docker compose up -d
